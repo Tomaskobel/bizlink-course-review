@@ -1,44 +1,84 @@
-# Content Validator
+# BizLink Course Review Dashboard
 
 ## Vision
-AI-powered course content validation tool. AI generates feedback on course content, human reviewers validate, classify, and resolve each feedback item.
+SME review dashboard for the BizLink LSH3 Dresspack training course. Three domain experts (Hendrik, Jens, Knut) left 64 comments on a 9-lesson course. AI processed the comments into structured, prioritized actions. This dashboard lets the SMEs validate each action: accept, skip, or modify.
+
+## Live
+**https://bizlink-course-review.vercel.app**
 
 ## Tech Stack
 - **Framework:** Next.js 16 + React 19 + TypeScript 5
-- **UI:** shadcn/ui (new-york style) + Radix UI + Tremor v3
-- **Styling:** Tailwind CSS v4 (OKLCh color space) + dark mode
+- **UI:** shadcn/ui (new-york) + Radix UI + Tremor v3
+- **Styling:** Tailwind CSS v4 + dark mode
 - **Icons:** Google Material Symbols Outlined
-- **State:** React local state (Supabase + TanStack Query ready)
+- **Data:** Supabase (PostgreSQL) + TanStack React Query
+- **Hosting:** Vercel
+
+## Data Model (Supabase)
+4 tables in project `mowcdrhwdaifxpndulfo`:
+
+| Table | Rows | Purpose |
+|-------|------|---------|
+| `cr_raw_comments` | 64 | Original reviewer comments |
+| `cr_global_rules` | 7 | Course-wide terminology & style rules |
+| `cr_slide_actions` | 56 | Lesson-specific changes to review |
+| `cr_conflicts` | 4 | Conflicting reviewer opinions needing resolution |
+
+### Classification — 2 Dimensions
+- **Type:** TERMINOLOGY, TECHNICAL, CONTENT, TONE, VISUAL
+- **Priority:** P1 Critical, P2 High, P3 Medium, P4 Low
 
 ## Pages
-1. **Dashboard** (`/`) — Stats overview + lesson list with progress
-2. **Validation Workspace** (`/validate?lesson=id`) — Split-panel: original content + AI feedback cards
 
-## Workflow
-1. AI generates feedback items with severity (critical/major/minor/suggestion) and category
-2. Reviewer sees original content (left) + feedback cards (right)
-3. Per feedback item: Accept / Reject / Edit
-4. Edit opens resolution dialog with reclassification + text correction
+### Dashboard (`/`)
+- Stats: total issues, pending, resolved, critical open
+- "How Your Comments Were Processed" — educational methodology section
+- Classification explainer (type + priority)
+- **Course-Wide Rules** split into two groups:
+  - Product Definition & Terminology (G-02..G-05) — concrete find-and-replace
+  - Language & Description Style (G-06, G-07) — general writing guidelines
+- Open Conflicts with Option A / Option B + recommendation
+- Module 1 lesson list with per-lesson stats
 
-## Keyboard Shortcuts
-- `A` accept, `R` reject, `E` edit selected feedback
-- `J/K` or arrows: navigate feedback items
+### Validation Workspace (`/validate?lesson=N`)
+- Dismissible "How to review" guide banner
+- Filter bar: type, priority, status
+- Feedback cards with clear sections: Reviewer Comment, Affected Text, Proposed Replacement
+- Actions: Apply this change / Skip / Modify
+- Resolution panel for editing replacement text
+- Progress tracking: "X of Y reviewed / Z remaining"
+- Lesson navigation (prev/next)
 
-## Running
+## Key Files
+```
+src/
+├── app/
+│   ├── page.tsx              # Dashboard
+│   └── validate/page.tsx     # Validation workspace
+├── components/validation/
+│   ├── FeedbackCard.tsx      # Individual action card
+│   ├── FilterBar.tsx         # Type/priority/status filters
+│   ├── LessonList.tsx        # Lesson cards with stats
+│   ├── ResolutionPanel.tsx   # "Modify" dialog
+│   └── StatsBar.tsx          # Summary stat boxes
+├── hooks/
+│   ├── useReviewData.ts      # Fetches all cr_ tables
+│   └── useFeedbackMutations.ts # Accept/reject/edit mutations
+├── lib/
+│   ├── review-adapter.ts     # Maps cr_ data → UI types
+│   └── supabase.ts           # Supabase client
+└── types/
+    ├── review.types.ts       # GlobalRule, SlideAction, Conflict types + configs
+    └── validation.types.ts   # FeedbackItem, stats helpers
+```
+
+## Running Locally
 ```bash
 pnpm install
 pnpm dev
 ```
+Requires `.env.local` with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
-## Current State
-- [x] Project scaffolded
-- [x] UI components from Marco Car stack
-- [x] Dashboard page with stats + lesson list
-- [x] Validation workspace with split panel
-- [x] Feedback cards with accept/reject/edit
-- [x] Resolution dialog with reclassification
-- [x] Filter bar (severity + status)
-- [x] Keyboard shortcuts
-- [x] Mock data (PLC course)
-- [x] Section-level navigation (prev/next lesson)
-- [ ] Supabase persistence
+## Deployment
+Hosted on Vercel. Push to `main` or run `vercel --prod`.
+Env vars configured in Vercel project settings.
