@@ -9,6 +9,7 @@ import { FeedbackCard } from "@/components/validation/FeedbackCard";
 import { ResolutionPanel } from "@/components/validation/ResolutionPanel";
 import { FilterBar } from "@/components/validation/FilterBar";
 import { useReviewData } from "@/hooks/useReviewData";
+import { useSlideActionMutations } from "@/hooks/useSlideActionMutations";
 import { adaptReviewData } from "@/lib/review-adapter";
 import {
   computeStats,
@@ -31,6 +32,7 @@ function ValidatePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data, isLoading } = useReviewData();
+  const { acceptAction, rejectAction, editAction } = useSlideActionMutations();
 
   const lessonId = searchParams.get("lesson");
 
@@ -94,7 +96,8 @@ function ValidatePageContent() {
         item.id === id ? { ...item, status: "accepted" as const } : item
       )
     );
-  }, []);
+    acceptAction.mutate(id);
+  }, [acceptAction]);
 
   const handleReject = useCallback((id: string) => {
     setFeedbackItems((prev) =>
@@ -102,7 +105,8 @@ function ValidatePageContent() {
         item.id === id ? { ...item, status: "rejected" as const } : item
       )
     );
-  }, []);
+    rejectAction.mutate(id);
+  }, [rejectAction]);
 
   const handleEdit = useCallback(
     (id: string) => {
@@ -139,22 +143,33 @@ function ValidatePageContent() {
             : item
         )
       );
+      editAction.mutate({
+        id,
+        reviewerNote: data.reviewerNote,
+        replacementText: data.correctedText,
+      });
       setEditDialogOpen(false);
       setEditingItem(null);
     },
-    []
+    [editAction]
   );
 
   const handleAcceptAllMinor = useCallback(() => {
+    const minorPendingIds = feedbackItems
+      .filter((i) => i.status === "pending" && (i.severity === "minor" || i.severity === "suggestion"))
+      .map((i) => i.id);
+
     setFeedbackItems((prev) =>
       prev.map((item) =>
-        item.status === "pending" &&
-        (item.severity === "minor" || item.severity === "suggestion")
+        minorPendingIds.includes(item.id)
           ? { ...item, status: "accepted" as const }
           : item
       )
     );
-  }, []);
+
+    // Persist each to Supabase
+    minorPendingIds.forEach((id) => acceptAction.mutate(id));
+  }, [feedbackItems, acceptAction]);
 
   // Keyboard shortcuts
   useEffect(() => {

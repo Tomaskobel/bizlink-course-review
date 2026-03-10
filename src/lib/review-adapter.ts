@@ -27,8 +27,10 @@ function mapCategory(c: string): FeedbackCategory {
 
 function mapStatus(s: string): FeedbackItem["status"] {
   switch (s) {
-    case "superseded": return "rejected";
-    case "done": return "accepted";
+    case "superseded":
+    case "rejected": return "rejected";
+    case "done":
+    case "applied": return "accepted";
     default: return "pending";
   }
 }

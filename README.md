@@ -14,14 +14,23 @@ SME review dashboard for the BizLink LSH3 Dresspack training course. Three domai
 - **Data:** Supabase (PostgreSQL) + TanStack React Query
 - **Hosting:** Vercel
 
+## Data Flow
+```
+Raw Comments (cr_raw_comments, 64) → AI Processing →
+  Global Rules (cr_global_rules, 7) +
+  Slide Actions (cr_slide_actions, 56) +
+  Conflicts (cr_conflicts, 4) →
+  Dashboard (read) + Validate (read/write)
+```
+
 ## Data Model (Supabase)
 4 tables in project `mowcdrhwdaifxpndulfo`:
 
 | Table | Rows | Purpose |
 |-------|------|---------|
-| `cr_raw_comments` | 64 | Original reviewer comments |
+| `cr_raw_comments` | 64 | Original reviewer comments (immutable audit trail) |
 | `cr_global_rules` | 7 | Course-wide terminology & style rules |
-| `cr_slide_actions` | 56 | Lesson-specific changes to review |
+| `cr_slide_actions` | 56 | Lesson-specific changes to review (status + reviewer_note + decided_at persisted) |
 | `cr_conflicts` | 4 | Conflicting reviewer opinions needing resolution |
 
 ### Classification — 2 Dimensions
@@ -62,8 +71,8 @@ src/
 │   ├── ResolutionPanel.tsx   # "Modify" dialog
 │   └── StatsBar.tsx          # Summary stat boxes
 ├── hooks/
-│   ├── useReviewData.ts      # Fetches all cr_ tables
-│   └── useFeedbackMutations.ts # Accept/reject/edit mutations
+│   ├── useReviewData.ts            # Fetches all cr_ tables
+│   └── useSlideActionMutations.ts  # Accept/reject/edit → cr_slide_actions
 ├── lib/
 │   ├── review-adapter.ts     # Maps cr_ data → UI types
 │   └── supabase.ts           # Supabase client
