@@ -208,49 +208,120 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Global Rules */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Global Rules ({data.globalRules.length})
-            </h2>
-            <span className="text-xs text-muted-foreground">
-              Applied across all lessons
-            </span>
-          </div>
-          <div className="space-y-2">
-            {data.globalRules.map((rule) => {
-              const cat = categoryConfig[rule.category];
-              const pri = priorityConfig[rule.priority];
-              return (
-                <div key={rule.id} className="border rounded-lg px-5 py-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className={`text-[11px] font-medium border ${cat.bg}`}>
-                      <Icon name={cat.icon} size={14} weight={400} />
-                      {cat.label}
-                    </Badge>
-                    <Badge className={`text-[11px] ${pri.bg} border-0`}>
-                      {pri.label}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground ml-auto">
-                      {rule.occurrence_count} occurrences &middot; {rule.reviewer_name}
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1">
-                      <p className="text-sm">
-                        <span className="line-through text-muted-foreground">{rule.wrong_term}</span>
-                        <span className="mx-2 text-muted-foreground">&rarr;</span>
-                        <span className="font-medium text-green-700 dark:text-green-400">{rule.correct_term}</span>
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">{rule.notes}</p>
-                    </div>
-                  </div>
+        {/* Global Rules — split into Terminology + Style */}
+        {(() => {
+          const terminologyIds = ["G-02", "G-03", "G-04", "G-05"];
+          const styleIds = ["G-06", "G-07"];
+          const terminology = data.globalRules.filter(r => terminologyIds.includes(r.rule_id));
+          const style = data.globalRules.filter(r => styleIds.includes(r.rule_id));
+          return (
+            <div className="space-y-6">
+              {/* Section header */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Course-Wide Rules
+                </h2>
+                <span className="text-xs text-muted-foreground">
+                  Applied across all lessons
+                </span>
+              </div>
+
+              {/* Group 1: Terminology */}
+              <div className="border rounded-lg overflow-hidden">
+                <div className="bg-blue-50/60 dark:bg-blue-950/20 px-5 py-3 border-b border-blue-200 dark:border-blue-900">
+                  <h3 className="text-xs font-semibold flex items-center gap-2 text-blue-800 dark:text-blue-300">
+                    <Icon name="spellcheck" size={16} weight={400} />
+                    Product Definition &amp; Terminology ({terminology.length})
+                  </h3>
+                  <p className="text-[11px] text-blue-700/70 dark:text-blue-400/70 mt-0.5">
+                    Concrete find-and-replace rules. The course developer can search for the wrong term and replace it everywhere.
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+                <div className="divide-y">
+                  {terminology.map((rule) => {
+                    const cat = categoryConfig[rule.category];
+                    const pri = priorityConfig[rule.priority];
+                    return (
+                      <div key={rule.id} className="px-5 py-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="text-[11px] font-mono bg-muted/50 border-muted-foreground/20">
+                            {rule.rule_id}
+                          </Badge>
+                          <Badge variant="outline" className={`text-[11px] font-medium border ${cat.bg}`}>
+                            <Icon name={cat.icon} size={14} weight={400} />
+                            {cat.label}
+                          </Badge>
+                          <Badge className={`text-[11px] ${pri.bg} border-0`}>
+                            {pri.label}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {rule.occurrence_count} occurrences &middot; {rule.reviewer_name}
+                          </span>
+                        </div>
+                        <div className="flex items-start gap-4">
+                          <div className="flex-1">
+                            <p className="text-sm">
+                              <span className="line-through text-red-400 dark:text-red-500/70">{rule.wrong_term}</span>
+                              <span className="mx-2 text-muted-foreground">&rarr;</span>
+                              <span className="font-medium text-green-700 dark:text-green-400">{rule.correct_term}</span>
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">{rule.notes}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Group 2: Style Guidelines */}
+              <div className="border rounded-lg overflow-hidden border-dashed">
+                <div className="bg-muted/30 px-5 py-3 border-b border-dashed">
+                  <h3 className="text-xs font-semibold flex items-center gap-2 text-muted-foreground">
+                    <Icon name="style" size={16} weight={400} />
+                    Language &amp; Description Style ({style.length})
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground/70 mt-0.5">
+                    General writing guidelines — not specific find-and-replace, but a tone and register to follow throughout the course.
+                  </p>
+                </div>
+                <div className="divide-y divide-dashed">
+                  {style.map((rule) => {
+                    const cat = categoryConfig[rule.category];
+                    const pri = priorityConfig[rule.priority];
+                    return (
+                      <div key={rule.id} className="px-5 py-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="text-[11px] font-mono bg-muted/50 border-muted-foreground/20">
+                            {rule.rule_id}
+                          </Badge>
+                          <Badge variant="outline" className={`text-[11px] font-medium border ${cat.bg}`}>
+                            <Icon name={cat.icon} size={14} weight={400} />
+                            {cat.label}
+                          </Badge>
+                          <Badge className={`text-[11px] ${pri.bg} border-0`}>
+                            {pri.label}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {rule.reviewer_name}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">{rule.wrong_term}</span>
+                            <span className="mx-2 text-muted-foreground">&rarr;</span>
+                            <span className="font-medium">{rule.correct_term}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">{rule.notes}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Conflicts */}
         {data.conflicts.length > 0 && (
