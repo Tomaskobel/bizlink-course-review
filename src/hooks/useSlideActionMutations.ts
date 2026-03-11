@@ -13,6 +13,10 @@ export function useSlideActionMutations() {
   const qc = useQueryClient();
   const invalidate = () => qc.invalidateQueries({ queryKey: ["review-data"] });
 
+  const onError = (err: Error) => {
+    console.error("[useSlideActionMutations]", err.message);
+  };
+
   const acceptAction = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -22,6 +26,7 @@ export function useSlideActionMutations() {
       if (error) throw error;
     },
     onSuccess: invalidate,
+    onError,
   });
 
   const rejectAction = useMutation({
@@ -33,6 +38,7 @@ export function useSlideActionMutations() {
       if (error) throw error;
     },
     onSuccess: invalidate,
+    onError,
   });
 
   const editAction = useMutation({
@@ -51,6 +57,7 @@ export function useSlideActionMutations() {
       if (error) throw error;
     },
     onSuccess: invalidate,
+    onError,
   });
 
   return { acceptAction, rejectAction, editAction };

@@ -33,24 +33,13 @@ export interface FeedbackItem {
   reviewPriority?: string;
   /** Reviewer note */
   reviewerNote?: string;
-  /** Reclassified severity (if reviewer changed it) */
-  reclassifiedSeverity?: Severity;
-  /** Reclassified category (if reviewer changed it) */
-  reclassifiedCategory?: FeedbackCategory;
-}
-
-export interface ContentSection {
-  id: string;
-  title: string;
-  body: string;
-  order: number;
 }
 
 export interface Lesson {
   id: string;
   title: string;
   order: number;
-  sections: ContentSection[];
+  sections: { id: string; title: string; body: string; order: number }[];
   feedbackItems: FeedbackItem[];
 }
 
@@ -58,47 +47,6 @@ export interface Course {
   id: string;
   title: string;
   lessons: Lesson[];
-}
-
-// ── Tracked Changes ─────────────────────────────────────────────
-
-export interface TextChange {
-  id: string;
-  sectionId: string;
-  /** Original text that was replaced */
-  originalText: string;
-  /** New text that replaced it */
-  newText: string;
-  /** Character offset in the section body where the change starts */
-  offset: number;
-  /** Who made the change */
-  author: string;
-  /** When the change was made */
-  timestamp: string;
-  /** Linked feedback item ID (if change came from resolving feedback) */
-  feedbackItemId?: string;
-  /** Whether the change has been accepted/finalized */
-  accepted: boolean;
-}
-
-// ── Comments ────────────────────────────────────────────────────
-
-export interface Comment {
-  id: string;
-  author: string;
-  text: string;
-  timestamp: string;
-}
-
-export interface CommentThread {
-  id: string;
-  sectionId: string;
-  /** The text passage this comment is anchored to */
-  anchorText: string;
-  /** Character offset in section body */
-  anchorOffset: number;
-  comments: Comment[];
-  resolved: boolean;
 }
 
 /** Computed stats for a lesson or course */

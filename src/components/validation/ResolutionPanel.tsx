@@ -20,11 +20,7 @@ import {
   type ReviewCategory,
   type ReviewPriority,
 } from "@/types/review.types";
-import type {
-  FeedbackItem,
-  Severity,
-  FeedbackCategory,
-} from "@/types/validation.types";
+import type { FeedbackItem } from "@/types/validation.types";
 
 interface ResolutionPanelProps {
   item: FeedbackItem | null;
@@ -35,8 +31,6 @@ interface ResolutionPanelProps {
     data: {
       correctedText: string;
       reviewerNote: string;
-      reclassifiedSeverity?: Severity;
-      reclassifiedCategory?: FeedbackCategory;
     }
   ) => void;
 }

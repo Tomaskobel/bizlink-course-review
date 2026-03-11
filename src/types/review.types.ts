@@ -2,9 +2,7 @@
 
 export type ReviewCategory = "TERMINOLOGY" | "TECHNICAL" | "CONTENT" | "TONE" | "VISUAL";
 export type ReviewPriority = "P1" | "P2" | "P3" | "P4";
-export type ActionStatus = "pending" | "superseded" | "done";
-export type ConflictStatus = "open" | "resolved";
-export type ActionType = "replace" | "observation" | "correction" | "visual";
+export type ActionStatus = "pending" | "applied" | "rejected" | "superseded";
 
 export interface GlobalRule {
   id: string;
@@ -30,7 +28,7 @@ export interface SlideAction {
   replacement_text: string | null;
   category: ReviewCategory;
   priority: ReviewPriority;
-  action_type: ActionType;
+  action_type: string;
   execution_phase: number;
   reviewer: string;
   reviewer_email: string;
@@ -50,7 +48,7 @@ export interface Conflict {
   option_b_reviewer: string;
   affected_slides: string;
   recommendation: string;
-  status: ConflictStatus;
+  status: "open" | "resolved";
   decided_by: string | null;
   decided_at: string | null;
   linked_rule_id: string | null;
@@ -134,9 +132,3 @@ export const priorityConfig: Record<ReviewPriority, { label: string; color: stri
   },
 };
 
-export const phaseConfig: Record<number, { label: string; description: string }> = {
-  0: { label: "Phase 0", description: "Fix critical issues (safety/technical)" },
-  1: { label: "Phase 1", description: "Apply global terminology" },
-  2: { label: "Phase 2", description: "Apply content rewrites" },
-  3: { label: "Phase 3", description: "Apply tone & style polish" },
-};
